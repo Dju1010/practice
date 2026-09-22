@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from models import db, Note
+from models import db, Note, Tag
 
 
 def create_app():
@@ -10,29 +10,49 @@ def create_app():
 
     @app.route("/notes", methods=["GET"])
     def list_notes():
-        notes = Note.query.all()
-        return jsonify([n.to_dict() for n in notes])
+        search = request.args.get("search")
+        page = int(request.args.get("page", 1))
+        size = int(request.args.get("size", 10))
+
+        query = Note.query
+        if search:
+            query = query.filter(Note.title.contains(search))
+
+        pagination = query.paginate(page=page, per_page=size, error_out=False)
+
+        return jsonify({
+            "total": pagination.total,
+            "page": page,
+            "size": size,
+            "items": [n.to_dict() for n in pagination.items],
+        })
 
     @app.route("/notes", methods=["POST"])
     def create_note():
         data = request.get_json()
         if not data or "title" not in data:
             return jsonify({"error": "title required"}), 400
+
         note = Note(title=data["title"], body=data.get("body", ""))
         db.session.add(note)
+        db.session.flush()
+
+        for tag_name in data.get("tags", []):
+            db.session.add(Tag(name=tag_name, note_id=note.id))
+
         db.session.commit()
         return jsonify(note.to_dict()), 201
 
     @app.route("/notes/<int:note_id>", methods=["GET"])
     def get_note(note_id):
-        note = Note.query.get(note_id)
+        note = db.session.get(Note, note_id)
         if not note:
             return jsonify({"error": "not found"}), 404
         return jsonify(note.to_dict())
 
     @app.route("/notes/<int:note_id>", methods=["PUT"])
     def update_note(note_id):
-        note = Note.query.get(note_id)
+        note = db.session.get(Note, note_id)
         if not note:
             return jsonify({"error": "not found"}), 404
         data = request.get_json()
@@ -43,7 +63,7 @@ def create_app():
 
     @app.route("/notes/<int:note_id>", methods=["DELETE"])
     def delete_note(note_id):
-        note = Note.query.get(note_id)
+        note = db.session.get(Note, note_id)
         if not note:
             return jsonify({"error": "not found"}), 404
         db.session.delete(note)
