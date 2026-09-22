@@ -1,0 +1,10 @@
+2024-01-01 10:00:01 [INFO] server started
+2024-01-01 10:00:05 [INFO] request handled GET /notes
+2024-01-01 10:00:10 [ERROR] database timeout
+2024-01-01 10:00:15 [WARNING] slow query 1.2s
+2024-01-01 10:00:20 [INFO] request handled POST /notes
+2024-01-01 10:00:25 [ERROR] database timeout
+2024-01-01 10:00:30 [DEBUG] cache hit
+2024-01-01 10:00:35 [INFO] request handled GET /notes
+2024-01-01 10:00:40 [WARNING] slow query 0.9s
+2024-01-01 10:00:45 [ERROR] validation failed
