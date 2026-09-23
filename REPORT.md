@@ -86,6 +86,18 @@ pip install flask flask-sqlalchemy pytest
 запушил код на GitHub:
 https://github.com/Dju1010/practice
 
+### 4.6. Деплой на Render
+
+Задеплоил проект на Render (free tier) через GitHub.
+
+Настройки:
+- Build Command: pip install -r requirements.txt
+- Start Command: gunicorn app:app
+- Runtime: Python 3.12
+- Region: Frankfurt
+
+Демо-ссылка: https://practice-dpv9.onrender.com/notes
+
 ## 5. Результат
 
 - Работающее REST API с 5 эндпоинтами.

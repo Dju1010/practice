@@ -1,5 +1,7 @@
 # Notes API
 
+🔗 **Демо:** https://practice-dpv9.onrender.com/notes
+
 REST API для управления заметками на Flask + SQLite.  
 Учебный проект по практике.
 
@@ -136,6 +138,21 @@ python logs_processor.py
 - через `Counter` за один проход (быстро).
 
 ---
+## Деплой
+
+Проект задеплоен на **Render** (free tier).
+
+- Build Command: `pip install -r requirements.txt`
+- Start Command: `gunicorn app:app`
+- Runtime: Python 3.12
+- Region: Frankfurt
+
+**Демо:** https://practice-dpv9.onrender.com/notes
+
+### Docker (локально)
+
+docker build -t notes-api .
+docker run -p 8000:8000 notes-api
 
 ## Автор
 
