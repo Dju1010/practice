@@ -55,7 +55,7 @@ pip install flask flask-sqlalchemy pytest
 
 ### 4.3. REST API для заметок
 
-Создал модель Note (id, title, body, created_at) на SQLAlchemy.
+Создал модель Note (id, title, body, created_at)
 Реализовал CRUD-эндпоинты во Flask:
 
 | Метод  | URL         | Описание              |
@@ -66,9 +66,20 @@ pip install flask flask-sqlalchemy pytest
 | PUT    | /notes/<id> | Обновить заметку      |
 | DELETE | /notes/<id> | Удалить заметку       |
 
-Данные хранятся в SQLite (файл instance/notes.db).
+### 4.4. Работа с PostgreSQL
 
-### 4.4. Тестирование
+Для локальной разработки использован PostgreSQL 16.
+
+При первом запуске Flask-приложения SQLAlchemy автоматически
+создаёт таблицы `note` и `tag` в базе `notes_db`.
+
+Подключение вынесено в переменную окружения `DATABASE_URL`:
+- локально: `postgresql://postgres@localhost:5432/notes_db`
+- на Render: переменная не задана → используется SQLite
+
+Это позволяет одному коду работать с разными БД без изменений.
+
+### 4.5. Тестирование
 
 Написал 6 unit-тестов с pytest:
 - пустой список;
@@ -80,13 +91,13 @@ pip install flask flask-sqlalchemy pytest
 
 Все тесты проходят
 
-### 4.5. Git и GitHub
+### 4.6. Git и GitHub
 
 Инициализировал репозиторий, настроил .gitignore,
 запушил код на GitHub:
 https://github.com/Dju1010/practice
 
-### 4.6. Деплой на Render
+### 4.7. Деплой на Render
 
 Задеплоил проект на Render (free tier) через GitHub.
 
