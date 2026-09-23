@@ -2,7 +2,7 @@
 
 🔗 **Демо:** https://practice-dpv9.onrender.com/notes
 
-REST API для управления заметками на Flask + SQLite.  
+REST API для управления заметками на Flask + PostgreSQL/SQLite.  
 Учебный проект по практике.
 
 ## Стек технологий
@@ -10,24 +10,32 @@ REST API для управления заметками на Flask + SQLite.
 - Python 3.12
 - Flask
 - Flask-SQLAlchemy
-- SQLite
+- PostgreSQL (локально)
+- SQLite (на Render)
 - pytest
 - Git / GitHub
+- Docker
 
 ## Структура проекта
 
 ```
 practice/
-├── app.py              # Flask-приложение и роуты
-├── models.py           # Модель Note
-├── logs_processor.py   # Скрипт-обработчик логов
-├── app.log             # Пример лог-файла
-├── requirements.txt    # Зависимости
-├── README.md           # Документация
-├── tests/
-│   ├── __init__.py
-│   └── test_api.py     # Тесты API
-└── .gitignore
+├── app.py               # Flask-приложение и роуты
+├── models.py            # Модели Note и Tag
+├── logs_processor.py    # Скрипт-обработчик логов
+├── sql_queries.py       # Примеры SQL-запросов
+├── app.log              # Пример лог-файла
+├── requirements.txt     # Зависимости
+├── Procfile             # Команда запуска для Render
+├── runtime.txt          # Версия Python для Render
+├── Dockerfile           # Для локального запуска в контейнере
+├── .dockerignore
+├── .gitignore
+├── README.md            # Документация
+├── REPORT.md            # Отчёт по практике
+└── tests/
+    ├── __init__.py
+    └── test_api.py      # Тесты API
 ```
 
 ## Установка и запуск
@@ -48,29 +56,36 @@ python -m venv .venv
 
 ### 3. Установить зависимости
 
-```
+```bash
 pip install -r requirements.txt
 ```
 
 ### 4. Запустить приложение
 
-```
+```bash
 python app.py
 ```
 
 Сервер запустится на `http://127.0.0.1:5000`.
 
+```powershell
+$env:DATABASE_URL = "postgresql://postgres@localhost:5432/notes_db"
+python app.py
+```
+
 ---
 
 ## Эндпоинты API
 
-| Метод  | URL              | Описание              |
-|--------|------------------|-----------------------|
-| GET    | `/notes`         | Список всех заметок   |
-| POST   | `/notes`         | Создать заметку       |
-| GET    | `/notes/<id>`    | Получить одну заметку |
-| PUT    | `/notes/<id>`    | Обновить заметку      |
-| DELETE | `/notes/<id>`    | Удалить заметку       |
+| Метод  | URL                          | Описание                          |
+|--------|------------------------------|-----------------------------------|
+| GET    | `/notes`                     | Список всех заметок               |
+| GET    | `/notes?page=1&size=10`      | Пагинация                         |
+| GET    | `/notes?search=bread`        | Поиск по названию                 |
+| POST   | `/notes`                     | Создать заметку (с тегами)        |
+| GET    | `/notes/<id>`                | Получить одну заметку             |
+| PUT    | `/notes/<id>`                | Обновить заметку                  |
+| DELETE | `/notes/<id>`                | Удалить заметку                   |
 
 ---
 
@@ -84,13 +99,25 @@ python app.py
 Invoke-RestMethod http://127.0.0.1:5000/notes
 ```
 
-**Создать заметку:**
+**Пагинация:**
+
+```powershell
+Invoke-RestMethod "http://127.0.0.1:5000/notes?page=1&size=5"
+```
+
+**Поиск:**
+
+```powershell
+Invoke-RestMethod "http://127.0.0.1:5000/notes?search=bread"
+```
+
+**Создать заметку с тегами:**
 
 ```powershell
 Invoke-RestMethod -Uri http://127.0.0.1:5000/notes `
   -Method Post `
   -ContentType "application/json" `
-  -Body '{"title":"Buy bread","body":"until 6pm"}'
+  -Body '{"title":"Buy bread","body":"until 6pm","tags":["shopping","food"]}'
 ```
 
 **Получить одну заметку:**
@@ -113,6 +140,7 @@ Invoke-RestMethod -Uri http://127.0.0.1:5000/notes/1 `
 ```powershell
 Invoke-RestMethod -Uri http://127.0.0.1:5000/notes/1 -Method Delete
 ```
+
 ---
 
 ## Тесты
@@ -121,13 +149,13 @@ Invoke-RestMethod -Uri http://127.0.0.1:5000/notes/1 -Method Delete
 python -m pytest tests/ -v
 ```
 
-Ожидаемый результат: `6 passed`.
+Ожидаемый результат: `9 passed`.
 
 ---
 
 ## Обработчик логов
 
-```
+```bash
 python logs_processor.py
 ```
 
@@ -138,6 +166,18 @@ python logs_processor.py
 - через `Counter` за один проход (быстро).
 
 ---
+
+## SQL-запросы
+
+```bash
+python sql_queries.py
+```
+
+Файл `sql_queries.py` демонстрирует прямые запросы к PostgreSQL:
+SELECT, INSERT, UPDATE, DELETE, JOIN.
+
+---
+
 ## Деплой
 
 Проект задеплоен на **Render** (free tier).
@@ -151,8 +191,12 @@ python logs_processor.py
 
 ### Docker (локально)
 
+```bash
 docker build -t notes-api .
-docker run -p 8000:8000 notes-api
+docker run -e PORT=8000 -p 8000:8000 notes-api
+```
+
+---
 
 ## Автор
 

@@ -1,35 +1,28 @@
-import sqlite3
+import psycopg2
 
-conn = sqlite3.connect("instance/notes.db")
+conn = psycopg2.connect(host="localhost", port=5432, dbname="notes_db", user="postgres")
 cur = conn.cursor()
 
-# вывести все заметки
-print("все заметки:")
-for row in cur.execute("SELECT id, title FROM note"):
-    print(row)
+cur.execute("SELECT id, title FROM note")
+print("заметки:", cur.fetchall())
 
-# заметки с тегами через join
-print("\nзаметки + теги:")
-q = "SELECT note.title, tag.name FROM note JOIN tag ON tag.note_id = note.id"
-for row in cur.execute(q):
-    print(row)
+cur.execute("SELECT note.title, tag.name FROM note JOIN tag ON tag.note_id = note.id")
+print("с тегами:", cur.fetchall())
 
-# добавить
-cur.execute("INSERT INTO note (title, body, created_at) VALUES (?, ?, datetime('now'))",
+cur.execute("INSERT INTO note (title, body, created_at) VALUES (%s, %s, NOW())",
             ("Тест", "из SQL"))
 conn.commit()
-new_id = cur.lastrowid
 
-# обновить
-cur.execute("UPDATE note SET title = ? WHERE id = ?", ("Обновлено", new_id))
+cur.execute("SELECT id FROM note ORDER BY id DESC LIMIT 1")
+nid = cur.fetchone()[0]
+
+cur.execute("UPDATE note SET title = %s WHERE id = %s", ("Обновлено", nid))
 conn.commit()
 
-# удалить
-cur.execute("DELETE FROM note WHERE id = ?", (new_id,))
+cur.execute("DELETE FROM note WHERE id = %s", (nid,))
 conn.commit()
 
-# посчитать
-cnt = cur.execute("SELECT COUNT(*) FROM note").fetchone()[0]
-print("\nвсего заметок:", cnt)
+cur.execute("SELECT COUNT(*) FROM note")
+print("всего:", cur.fetchone()[0])
 
 conn.close()

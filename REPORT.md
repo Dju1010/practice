@@ -1,7 +1,7 @@
 # Отчёт по практике
 
-**Студент:** [Александров Дьулус Александрович]  
-**Группа:** [ММПМИ-24]  
+**Студент:** Александров Дьулус Александрович  
+**Группа:** ММПМИ-24
 
 ## 1. Цель практики
 
@@ -25,9 +25,10 @@
 - Язык: Python 3.12
 - Фреймворк: Flask
 - ORM: Flask-SQLAlchemy
-- БД: SQLite (для разработки)
+- БД: PostgreSQL (локально), SQLite (на Render)
 - Тесты: pytest
 - Контроль версий: Git, GitHub
+- Контейнеризация: Docker
 - IDE: VS Code
 
 ## 4. Ход работы
@@ -55,7 +56,7 @@ pip install flask flask-sqlalchemy pytest
 
 ### 4.3. REST API для заметок
 
-Создал модель Note (id, title, body, created_at)
+Создал модель Note (id, title, body, created_at).
 Реализовал CRUD-эндпоинты во Flask:
 
 | Метод  | URL         | Описание              |
@@ -66,30 +67,40 @@ pip install flask flask-sqlalchemy pytest
 | PUT    | /notes/<id> | Обновить заметку      |
 | DELETE | /notes/<id> | Удалить заметку       |
 
+Дополнительно добавлены:
+- пагинация (GET /notes?page=1&size=10);
+- поиск по названию (GET /notes?search=...);
+- вторая таблица Tag со связью к Note (теги).
+
 ### 4.4. Работа с PostgreSQL
 
 Для локальной разработки использован PostgreSQL 16.
+Подключение настроено через DBeaver — в базе notes_db
+созданы таблицы note и tag (автоматически через SQLAlchemy).
 
-При первом запуске Flask-приложения SQLAlchemy автоматически
-создаёт таблицы `note` и `tag` в базе `notes_db`.
+Подключение вынесено в переменную окружения DATABASE_URL:
+- локально: postgresql://postgres@localhost:5432/notes_db
+- на Render: переменная не задана, используется SQLite
 
-Подключение вынесено в переменную окружения `DATABASE_URL`:
-- локально: `postgresql://postgres@localhost:5432/notes_db`
-- на Render: переменная не задана → используется SQLite
+Это позволяет одному и тому же коду работать с разными БД.
 
-Это позволяет одному коду работать с разными БД без изменений.
+В файле sql_queries.py показаны прямые SQL-запросы:
+SELECT, INSERT, UPDATE, DELETE, JOIN.
 
 ### 4.5. Тестирование
 
-Написал 6 unit-тестов с pytest:
+Написал 9 unit-тестов с pytest:
 - пустой список;
 - создание заметки;
 - получение заметки по id;
 - обновление;
 - удаление;
-- обработка 404.
+- обработка 404;
+- создание заметки с тегами;
+- пагинация;
+- поиск.
 
-Все тесты проходят
+Все тесты проходят (9 passed).
 
 ### 4.6. Git и GitHub
 
@@ -97,7 +108,15 @@ pip install flask flask-sqlalchemy pytest
 запушил код на GitHub:
 https://github.com/Dju1010/practice
 
-### 4.7. Деплой на Render
+### 4.7. Docker
+
+Написал Dockerfile на базе python:3.12-slim.
+Сборка и запуск:
+
+docker build -t notes-api .
+docker run -e PORT=8000 -p 8000:8000 notes-api
+
+### 4.8. Деплой на Render
 
 Задеплоил проект на Render (free tier) через GitHub.
 
@@ -112,10 +131,15 @@ https://github.com/Dju1010/practice
 ## 5. Результат
 
 - Работающее REST API с 5 эндпоинтами.
-- 6 unit-тестов (pytest).
+- 9 unit-тестов (pytest).
 - Скрипт обработки логов.
-- Репозиторий на GitHub с полной историей коммитов.
-- Документация (README.md).
+- Работа с PostgreSQL через DBeaver (2 таблицы: note, tag).
+- Docker-образ собирается и запускается.
+- Деплой на Render (free tier).
+- Репозиторий на GitHub.
+- Документация (README.md, REPORT.md).
+
+Демо: https://practice-dpv9.onrender.com/notes
 
 ## Приложение
 
